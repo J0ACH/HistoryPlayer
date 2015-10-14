@@ -1,4 +1,4 @@
-Gitamp{
+HistoryPlayer{
 	classvar version = 0.03;
 	classvar serverMemory = 5529600;
 	classvar instance = nil;
@@ -17,7 +17,7 @@ Gitamp{
 		instance.isNil.if(
 			{ ^super.new.makeProxy(120).init; },
 			{
-				"Gitamp instance running".postln;
+				"HistoryPlayer instance running".postln;
 				instance.win.visible_(true);
 				^instance;
 			}
@@ -67,36 +67,36 @@ Gitamp{
 		isRunning.if(
 			{
 				switch (type,
-					\version, { "\nGitAmp [%]".format(version).postln; },
-					\exit, { "\nGitAmp closed ...".postln; },
+					\version, { "\nHistoryPlayer [%]".format(version).postln; },
+					\exit, { "\nHistoryPlayer closed ...".postln; },
 					\template, {
-						"\nGitAmp templates".postln;
+						"\nHistoryPlayer templates".postln;
 						template.sortedKeysValuesDo({|key, value| "\t- % || %".format(key, value).postln });
 					},
 					\lines, { isLoad.if({
-						"\nGitAmp lines".postln;
+						"\nHistoryPlayer lines".postln;
 						lines.do({ |oneLine, index| "\t%) %".format(index, oneLine).postln; }) });
 					},
 					\info, { isLoad.if({
-						"\nGitAmp info".postln;
+						"\nHistoryPlayer info".postln;
 						"\t- pathHistory || %".format(pathHistory).postln;
 						"\t- linesCount || %".format(lines.size-1).postln;
 						"\t- endTime || %".format(endTime).postln;
 					});
 					},
 					\code, { isLoad.if({
-						"\nGitAmp currentCode".postln;
+						"\nHistoryPlayer currentCode".postln;
 						currentCode.postln;
 					});
 					},
 					\playlist, {
-						"\nGitAmp tracks ( % )".format(Platform.userAppSupportDir +/+ "GitAmp" +/+ "HistoryFiles").postln;
+						"\nHistoryPlayer tracks ( % )".format(Platform.userAppSupportDir +/+ "HistoryPlayer" +/+ "HistoryFiles").postln;
 
 						playlist.do({ |onePath, index| "\t%) %".format(index, PathName(onePath).fileName).postln; })
 					},
 				)
 			},
-			{ "Gitamp instance not running".postln; }
+			{ "HistoryPlayer instance not running".postln; }
 		);
 	}
 
@@ -105,13 +105,13 @@ Gitamp{
 	initFiles{ |rootFolder|
 		var playlistFile, templateFile;
 
-		File.mkdir(rootFolder +/+ "GitAmp" +/+ "HistoryFiles");
-		File.mkdir(rootFolder +/+ "GitAmp" +/+ "RenderedFiles");
+		File.mkdir(rootFolder +/+ "HistoryPlayer" +/+ "HistoryFiles");
+		File.mkdir(rootFolder +/+ "HistoryPlayer" +/+ "RenderedFiles");
 
-		File.exists(rootFolder +/+ "GitAmp" +/+ "_template.scd").if (
+		File.exists(rootFolder +/+ "HistoryPlayer" +/+ "_template.scd").if (
 			{
 				var fileTxt;
-				templateFile = File(rootFolder +/+ "GitAmp" +/+ "_template.scd", "r");
+				templateFile = File(rootFolder +/+ "HistoryPlayer" +/+ "_template.scd", "r");
 
 				fileTxt = templateFile.readAllString.stripRTF;
 				fileTxt = fileTxt.replace("\n", "");
@@ -130,7 +130,7 @@ Gitamp{
 				templateFile.close;
 			},
 			{
-				templateFile = File(rootFolder +/+ "GitAmp" +/+ "_template.scd", "w");
+				templateFile = File(rootFolder +/+ "HistoryPlayer" +/+ "_template.scd", "w");
 				templateFile.write(	"colorBackground> Color.new255(30,30,30);\n");
 				templateFile.write( "colorFront> Color.new255(255,255,255);\n");
 				templateFile.write( "colorActive> Color.new255(80,80,80);\n");
@@ -138,8 +138,8 @@ Gitamp{
 				templateFile.write( "fontChapter> Font('Segoe UI', 10,true);\n");
 				templateFile.write( "fontSmall> Font('Segoe UI', 9,true);\n");
 				templateFile.write( "opacityWin> 0.85;\n");
-				templateFile.write( "pathHistory> (Platform.userAppSupportDir +/+ 'GitAmp' +/+ 'HistoryFiles');\n");
-				templateFile.write( "pathRender> (Platform.userAppSupportDir +/+ 'GitAmp' +/+ 'RenderedFiles');\n");
+				templateFile.write( "pathHistory> (Platform.userAppSupportDir +/+ 'HistoryPlayer' +/+ 'HistoryFiles');\n");
+				templateFile.write( "pathRender> (Platform.userAppSupportDir +/+ 'HistoryPlayer' +/+ 'RenderedFiles');\n");
 
 				templateFile.close;
 
@@ -147,11 +147,11 @@ Gitamp{
 			}
 		);
 
-		playlistFile = File(rootFolder +/+ "GitAmp" +/+ "_playlist.scd", "w");
+		playlistFile = File(rootFolder +/+ "HistoryPlayer" +/+ "_playlist.scd", "w");
 		playlistFile.close;
 
 
-		playlist = this.folderFiles(rootFolder +/+ "GitAmp" +/+ "HistoryFiles", true, \scd, true, true);
+		playlist = this.folderFiles(rootFolder +/+ "HistoryPlayer" +/+ "HistoryFiles", true, \scd, true, true);
 	}
 
 	folderFiles {|scanPath, subfolder = false, extensionType = nil, withPath = false, withExtension = true|
@@ -385,8 +385,8 @@ Gitamp{
 		controls[\playlist_txt]
 		.items_(this.trackName;)
 		.enterKeyAction = ({ |plist|
-			// var openingPath = Platform.userAppSupportDir +/+ "GitAmp" +/+ "HistoryFiles" +/+ playlist[plist.value] ++".scd";
-			// ("Gitamp at : " ++ plist.value).postln;
+			// var openingPath = Platform.userAppSupportDir +/+ "HistoryPlayer" +/+ "HistoryFiles" +/+ playlist[plist.value] ++".scd";
+			// ("HistoryPlayer at : " ++ plist.value).postln;
 			// openingPath.postln;
 			this.stop;
 			currentTime = 0;
