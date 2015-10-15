@@ -103,55 +103,88 @@ HistoryPlayer{
 	// FILE MANAGMENT //////////////////////////////////////////
 
 	initFiles{ |rootFolder|
-		var playlistFile, templateFile;
+		var playlistFile = rootFolder +/+ "HistoryPlayer" +/+ "_playlist.scd";
+		var templatePath = rootFolder +/+ "HistoryPlayer" +/+ "_template.scd";
 
 		File.mkdir(rootFolder +/+ "HistoryPlayer" +/+ "HistoryFiles");
 		File.mkdir(rootFolder +/+ "HistoryPlayer" +/+ "RenderedFiles");
 
-		File.exists(rootFolder +/+ "HistoryPlayer" +/+ "_template.scd").if (
+		File.exists(templatePath).if (
 			{
-				var fileTxt;
-				templateFile = File(rootFolder +/+ "HistoryPlayer" +/+ "_template.scd", "r");
-
-				fileTxt = templateFile.readAllString.stripRTF;
-				fileTxt = fileTxt.replace("\n", "");
-				fileTxt = fileTxt.split($;);
-				fileTxt.do({|txt, i|
-					var symbol, code;
-					txt.notEmpty.if({
-						txt = txt.split($>);
-						symbol = txt[0].stripRTF.asSymbol;
-						code = txt[1].stripRTF.asString;
-						symbol.notNil.if({
-							template.put(symbol.asSymbol, code.interpret);
-						});
-					});
-				});
-				templateFile.close;
+				this.readTemplate(templatePath)
 			},
 			{
-				templateFile = File(rootFolder +/+ "HistoryPlayer" +/+ "_template.scd", "w");
-				templateFile.write(	"colorBackground> Color.new255(30,30,30);\n");
-				templateFile.write( "colorFront> Color.new255(255,255,255);\n");
-				templateFile.write( "colorActive> Color.new255(80,80,80);\n");
-				templateFile.write( "fontTime> Font('Segoe UI', 14, true);\n");
-				templateFile.write( "fontChapter> Font('Segoe UI', 10,true);\n");
-				templateFile.write( "fontSmall> Font('Segoe UI', 9,true);\n");
-				templateFile.write( "opacityWin> 0.85;\n");
-				templateFile.write( "pathHistory> (Platform.userAppSupportDir +/+ 'HistoryPlayer' +/+ 'HistoryFiles');\n");
-				templateFile.write( "pathRender> (Platform.userAppSupportDir +/+ 'HistoryPlayer' +/+ 'RenderedFiles');\n");
-
-				templateFile.close;
-
+				this.newTemplate;
+				this.writeTemplate(templatePath, template);
 				this.initFiles(rootFolder);
 			}
 		);
 
-		playlistFile = File(rootFolder +/+ "HistoryPlayer" +/+ "_playlist.scd", "w");
+		playlistFile = File(playlistFile, "w");
 		playlistFile.close;
 
 
-		playlist = this.folderFiles(rootFolder +/+ "HistoryPlayer" +/+ "HistoryFiles", true, \scd, true, true);
+		// playlist = this.folderFiles(rootFolder +/+ "HistoryPlayer" +/+ "HistoryFiles", true, \scd, true, true);
+		this.refreshPlaylist;
+	}
+
+	newTemplate {
+		template.put(\colorBackground, Color.new255(30,30,30));
+		template.put(\colorFront, Color.new255(255,255,255));
+		template.put(\colorActive, Color.new255(80,80,80));
+		template.put(\fontTime, Font('Segoe UI', 14, 'true'));
+		template.put(\fontChapter, Font('Segoe UI', 10, 'true'));
+		template.put(\fontSmall, Font('Segoe UI', 9, 'true'));
+		template.put(\opacityWin, 0.85);
+		template.put(\pathHistory, (Platform.userAppSupportDir +/+ 'HistoryPlayer' +/+ 'HistoryFiles').asSymbol);
+		template.put(\pathRender, (Platform.userAppSupportDir +/+ 'HistoryPlayer' +/+ 'RenderedFiles').asSymbol);
+	}
+
+	writeTemplate {|path, template|
+		var templateFile = File(path, "w");
+		template.sortedKeysValuesDo({|key, value|
+			// "\t- % || %".format(key, value).postln;
+			templateFile.write("%>%;\n".format(key, value));
+		});
+		templateFile.close;
+		^nil;
+	}
+
+	readTemplate {|path|
+		File.exists(path).if (
+			{
+				var templateFile = File(path, "r");
+				var fileTxt = templateFile.readAllStringRTF;
+				fileTxt = fileTxt.replace("\n", "");
+				fileTxt = fileTxt.split($;);
+				fileTxt.do({|txt, i|
+					var symbol, code, stringPath, re;
+					txt.notEmpty.if({
+						txt = txt.split($>);
+						symbol = txt[0].stripRTF.asSymbol;
+						code = txt[1].stripRTF.asString;
+
+						// 2-lines from Quarks *isPath
+						re = if(thisProcess.platform.name !== 'windows', "^[~\\.]?/", "^(\\\\|[a-zA-Z]:)");
+						(code.findRegexp(re).size != 0).if( { stringPath = code; }, { stringPath = nil } );
+
+						symbol.notNil.if({
+							stringPath.isNil.if(
+								{ template.put(symbol.asSymbol, code.interpret);  },
+								{ template.put(symbol.asSymbol, stringPath.asSymbol); }
+							);
+						});
+
+					});
+				});
+				templateFile.close;
+
+				// template.sortedKeysValuesDo({|key, value| "\t- % || %".format(key, value).postln; });
+
+				^nil;
+			},
+			{ Error("HistoryPlayer template not found").throw; }
+		);
 	}
 
 	folderFiles {|scanPath, subfolder = false, extensionType = nil, withPath = false, withExtension = true|
@@ -305,6 +338,12 @@ HistoryPlayer{
 
 	refreshCode { controls[\code_txt].string_(currentCode);	}
 
+	refreshPlaylist{
+		playlist = this.folderFiles(template[\pathHistory], true, \scd, true, true);
+		controls[\playlist_txt].notNil.if ({ controls[\playlist_txt].items_(this.trackName); });
+
+	}
+
 	refreshInfo{
 
 		// INFOBAR //////////////////////////////////////////////
@@ -346,7 +385,12 @@ HistoryPlayer{
 			});
 		});
 
-		controls[\control_close].action_({ |button| (button.value == 1).if ({ this.stop; win.close; });	});
+		controls[\control_close].action_({ |button| (button.value == 1).if ({
+			this.stop;
+			this.writeTemplate(Platform.userAppSupportDir +/+ "HistoryPlayer" +/+ "_template.scd", template);
+			win.close;
+		});
+		});
 
 		controls[\control_open].action_({ |button| (button.value == 1).if({
 			// controls[\playlist_txt].value = 0;
@@ -395,11 +439,26 @@ HistoryPlayer{
 			// this.refreshCode;
 			this.play;
 			controls[\control_play].value = 1;
-		})
+		});
 
 		// .mouseDownEvent_({ |x, y, modifiers, buttonNumber, clickCount|
 		// "mouseList : x,y [%, %], modifer: %, buutNum: %, clickCnt: %".format(x, y, modifiers, buttonNumber, clickCount).postln;
 		// });
+
+		controls[\playlist_buttonHistoryPath]
+		.action_({ |button| (button.value == 1).if ({
+			FileDialog({|selectedPath|
+				var path = selectedPath.standardizePath;
+				template[\pathHistory] = path;
+				controls[\playlist_txtHistoryPath].string = path;
+				this.refreshPlaylist;
+				// controls[\playlist_txt].items_(this.trackName);
+			},nil, 2, 0, true );
+
+		});
+		button.value = 0;
+		});
+
 
 	}
 
