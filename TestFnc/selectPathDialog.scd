@@ -1,16 +1,14 @@
-Gitamp()
-
 (
 // selethPathDialog
 f = {
 	var path;
-		FileDialog(	{|selectedPath|
-		selectedPath.postln;
-		path = selectedPath;
+	FileDialog(	{|selectedPath|
+		path = PathName(selectedPath ++ "/");
+		path.pathOnly.postln;
 	},
 	{ path = nil; },
-	2,0,false
+	2,0,true
 	);
-	path;
+	path.pathOnly;
 }.value
 )
