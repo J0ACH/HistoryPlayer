@@ -429,21 +429,27 @@ HistoryPlayer{
 		controls[\playlist_txt]
 		.items_(this.trackName;)
 		.enterKeyAction = ({ |plist|
-			// var openingPath = Platform.userAppSupportDir +/+ "HistoryPlayer" +/+ "HistoryFiles" +/+ playlist[plist.value] ++".scd";
-			// ("HistoryPlayer at : " ++ plist.value).postln;
-			// openingPath.postln;
 			this.stop;
 			currentTime = 0;
 			currentLine = 0;
 			this.openHistory(playlist[plist.value]);
-			// this.refreshCode;
 			this.play;
 			controls[\control_play].value = 1;
 		});
+		controls[\playlist_txt].mouseDownAction = {|me, x, y, mod, buttNum, clickCnt|
+			// "mouse [%,%] mod:%, buttNum : %, clickCnt : %".format(x, y, mod, buttNum, clickCnt).postln;
+			(clickCnt == 2).if({
+				controls[\playlist_txt].value.postln;
+				this.stop;
+				currentTime = 0;
+				currentLine = 0;
+				this.openHistory(playlist[controls[\playlist_txt].value]);
+				this.play;
+				controls[\control_play].value = 1;
+			});
+		};
 
-		// .mouseDownEvent_({ |x, y, modifiers, buttonNumber, clickCount|
-		// "mouseList : x,y [%, %], modifer: %, buutNum: %, clickCnt: %".format(x, y, modifiers, buttonNumber, clickCount).postln;
-		// });
+
 
 		controls[\playlist_buttonHistoryPath]
 		.action_({ |button| (button.value == 1).if ({
@@ -452,9 +458,7 @@ HistoryPlayer{
 				template[\pathHistory] = path;
 				controls[\playlist_txtHistoryPath].string = path;
 				this.refreshPlaylist;
-				// controls[\playlist_txt].items_(this.trackName);
 			},nil, 2, 0, true );
-
 		});
 		button.value = 0;
 		});
@@ -638,7 +642,6 @@ HistoryPlayer{
 				Pen.addRect(Rect(0,0, views[\clock].bounds.width, views[\clock].bounds.height));
 				Pen.stroke;
 		});
-
 
 		controls.put(\clock_slider, Slider(views[\clock], Rect.fromPoints( (10@40), ((views[\clock].bounds.width - 10)@50) )));
 
