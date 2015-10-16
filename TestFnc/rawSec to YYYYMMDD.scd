@@ -12,14 +12,14 @@ f = {|rawSec|
 	//ok
 
 
-	"month %".format(month).postln;
+	// "month %".format(month).postln;
 	restDay = mod(month,1);
 	// restDay =rawSec - (( year/31556926)+1970);
-	"restDay %".format(restDay).postln;
-	// day = (restDay * 30.44)+1;
-	day = (restDay * 30.44)+2;
-	// day = ((month%30.44)+1);
-	"DD :  %".format(day.floor).postln;
+	// "restDay %".format(restDay).postln;
+
+	// day = (restDay * 30.44)+2;
+	day = ((restDay*30.44)+1).ceil;
+	"DD :  %  -- prob with day".format(day.floor).postln;
 
 
 	//ok
@@ -37,7 +37,7 @@ f.value(File.mtime("C:/GitHub/supercollider/Histories/test.scd"));
 f.value(File.mtime("C:/GitHub/supercollider/Histories/151005_joach_kof_remote.scd"));
 f.value(File.mtime("C:/Dropbox/Galerie/1.jpg"))
 f.value(File.mtime("C:/Dropbox/Galerie/grass test01.png"))
-f.value(1354395502)
+f.value(1297894762)
 f.value(0000000003)
 
 
