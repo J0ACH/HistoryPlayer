@@ -1,5 +1,5 @@
 HistoryPlayer{
-	classvar version = 0.03;
+	classvar version = 0.04;
 	classvar serverMemory = 5529600;
 	classvar instance = nil;
 
