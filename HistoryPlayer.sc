@@ -3,8 +3,10 @@ HistoryPlayer{
 	classvar serverMemory = 5529600;
 	classvar instance = nil;
 
-	var template, playlist;
-	var <win, views, controls;
+	var <template, playlist;
+	var <window, views, controls;
+
+	var panels;
 
 	var clock;
 	var currentHistory, pathHistory;
@@ -18,7 +20,7 @@ HistoryPlayer{
 			{ ^super.new.makeProxy(120).init; },
 			{
 				"HistoryPlayer instance running".postln;
-				instance.win.visible_(true);
+				instance.window.visible_(true);
 				^instance;
 			}
 		);
@@ -38,6 +40,8 @@ HistoryPlayer{
 			views = Dictionary.new;
 			controls = Dictionary.new;
 
+			panels = Dictionary.new;
+
 			// currentHistory = nil;
 			lines = nil;
 			pathHistory = "";
@@ -48,9 +52,30 @@ HistoryPlayer{
 
 			this.print(\version);
 			this.initFiles(Platform.userAppSupportDir).print(\template).print(\playlist);
-			this.initGUI(650,300);
-			this.initControl;
+			template[\opacityWin] = 1.0;
+			this.initGraphics(100,300);
+			// this.initGUI(650,300);
+			// this.initControl;
 		});
+	}
+
+	initGraphics { |winX, winY|
+		// var viewOriginX, viewOriginY, viewSizeX, viewSizeY;
+		// var originX, originY, sizeX, sizeY;
+
+		window = Window.new("HistoryPlayer v%".format(version), Rect(winX, winY, 1100, 600), false)
+		.alwaysOnTop_(true)
+		.alpha_(template[\opacityWin])
+		.background_(template[\colorBackground])
+		.front
+		// .userCanClose_(false)
+		.onClose_({ this.close; });
+
+		panels.put(\controler, HP_controler(this, (5@5), 400, window.bounds.height - 10));
+		panels.put(\playlist, HP_playlist(this, (410@5), 320, window.bounds.height - 10));
+		panels.put(\library, HP_library(this, (735@5), 320, window.bounds.height - 10));
+
+
 	}
 
 	makeProxy{|newTempo|
@@ -388,7 +413,7 @@ HistoryPlayer{
 		controls[\control_close].action_({ |button| (button.value == 1).if ({
 			this.stop;
 			this.writeTemplate(Platform.userAppSupportDir +/+ "HistoryPlayer" +/+ "_template.scd", template);
-			win.close;
+			window.close;
 		});
 		});
 
@@ -470,7 +495,7 @@ HistoryPlayer{
 		var viewOriginX, viewOriginY, viewSizeX, viewSizeY;
 		var originX, originY, sizeX, sizeY;
 
-		win = Window.new("HistoryPlayer v%".format(version), Rect(winX, winY, 800, 600), false)
+		window = Window.new("HistoryPlayer v%".format(version), Rect(winX, winY, 800, 600), false)
 		.alwaysOnTop_(true)
 		.alpha_(template[\opacityWin])
 		.background_(template[\colorBackground])
@@ -482,10 +507,10 @@ HistoryPlayer{
 		// PLAYLIST //////////////////////////////////////////////
 
 		viewOriginY = 10;
-		viewOriginX = (win.bounds.width/2) + 5;
-		viewSizeX = win.bounds.width/2 - 5;
-		viewSizeY = win.bounds.height - 20;
-		views.put(\playlist, UserView(win, Rect.fromPoints( ((win.bounds.width/2)@10), ((win.bounds.width-10)@(win.bounds.height-10))))
+		viewOriginX = (window.bounds.width/2) + 5;
+		viewSizeX = window.bounds.width/2 - 5;
+		viewSizeY = window.bounds.height - 20;
+		views.put(\playlist, UserView(window, Rect.fromPoints( ((window.bounds.width/2)@10), ((window.bounds.width-10)@(window.bounds.height-10))))
 			.drawFunc = {
 				Pen.strokeColor = template[\colorFront];
 				Pen.addRect(Rect(0,0, views[\playlist].bounds.width, views[\playlist].bounds.height));
@@ -579,10 +604,10 @@ HistoryPlayer{
 		// CODEBAR //////////////////////////////////////////////
 
 		viewOriginX = 10;
-		viewSizeX = (win.bounds.width/2) - (2*viewOriginX);
+		viewSizeX = (window.bounds.width/2) - (2*viewOriginX);
 		viewOriginY = 10;
 		viewSizeY = 330;
-		views.put(\code, UserView(win, Rect( viewOriginX, viewOriginY, viewSizeX, viewSizeY))
+		views.put(\code, UserView(window, Rect( viewOriginX, viewOriginY, viewSizeX, viewSizeY))
 			.drawFunc = {
 				Pen.strokeColor = template[\colorFront];
 				Pen.addRect(Rect(0,0, views[\code].bounds.width, views[\code].bounds.height));
@@ -604,7 +629,7 @@ HistoryPlayer{
 
 		viewOriginY = viewOriginY + viewSizeY + 10;
 		viewSizeY = 110;
-		views.put(\info, UserView(win, Rect( viewOriginX, viewOriginY, viewSizeX, viewSizeY))
+		views.put(\info, UserView(window, Rect( viewOriginX, viewOriginY, viewSizeX, viewSizeY))
 			.background_(template[\colorBackground])
 			.drawFunc = {
 				Pen.strokeColor = template[\colorFront];
@@ -635,7 +660,7 @@ HistoryPlayer{
 
 		viewOriginY = viewOriginY + viewSizeY + 10;
 		viewSizeY = 60;
-		views.put(\clock, UserView(win, Rect( viewOriginX, viewOriginY, viewSizeX, viewSizeY))
+		views.put(\clock, UserView(window, Rect( viewOriginX, viewOriginY, viewSizeX, viewSizeY))
 			.background_(template[\colorBackground])
 			.drawFunc = {
 				Pen.strokeColor = template[\colorFront];
@@ -656,7 +681,7 @@ HistoryPlayer{
 
 		viewOriginY = viewOriginY + viewSizeY + 10;
 		viewSizeY = 50;
-		views.put(\control, UserView(win, Rect( viewOriginX, viewOriginY, viewSizeX, viewSizeY))
+		views.put(\control, UserView(window, Rect( viewOriginX, viewOriginY, viewSizeX, viewSizeY))
 			.background_(template[\colorBackground])
 			.drawFunc = {
 				Pen.strokeColor = template[\colorFront];

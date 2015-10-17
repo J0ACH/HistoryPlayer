@@ -1,16 +1,21 @@
 HP_track{
 	classvar version = 0.04;
 
+	var parent;
+	var tracks;
+
+	var view, objects;
+	var originX, originY;
+	var sizeX, sizeY;
+	var displayMode;
+
+
+
 	var >template;
-	var objects;
 
 	var historyFile, historyLines;
 	var isLoad;
 
-	var view, frame;
-	var originX, originY;
-	var sizeX, sizeY;
-	var displayMode;
 
 	var mouseClickStartX, mouseClickStartY, mouseClickButton;
 	var isMouseOver;
