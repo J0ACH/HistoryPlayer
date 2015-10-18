@@ -4,6 +4,8 @@ HistoryPlayer{
 	classvar instance = nil;
 
 	var <template, playlist;
+	var controler, playlistNew, library;
+
 	var <window, views, controls;
 
 	var panels;
@@ -35,6 +37,8 @@ HistoryPlayer{
 		Server.local.waitForBoot({
 			instance = this;
 
+
+
 			template = Dictionary.new;
 			playlist = List.newClear;
 			views = Dictionary.new;
@@ -52,6 +56,11 @@ HistoryPlayer{
 
 			this.print(\version);
 			this.initFiles(Platform.userAppSupportDir).print(\template).print(\playlist);
+
+			controler = HP_controler(instance);
+			playlistNew = HP_playlist(instance);
+			library = HP_library(instance);
+
 			template[\opacityWin] = 1.0;
 			this.initGraphics(100,300);
 			// this.initGUI(650,300);
@@ -71,10 +80,13 @@ HistoryPlayer{
 		// .userCanClose_(false)
 		.onClose_({ this.close; });
 
-		panels.put(\controler, HP_controler(this, (5@5), 400, window.bounds.height - 10));
-		panels.put(\playlist, HP_playlist(this, (410@5), 320, window.bounds.height - 10));
-		panels.put(\library, HP_library(this, (735@5), 320, window.bounds.height - 10));
+		panels.put(\controler, controler.initGUI((5@5), 400, window.bounds.height - 10));
+		panels.put(\playlist, playlistNew.initGUI((410@5), 320, window.bounds.height - 10));
+		panels.put(\library, library.initGUI((735@5), 320, window.bounds.height - 10));
 
+		controler.refreshGUI;
+		playlistNew.refreshGUI;
+		library.refreshGUI;
 
 	}
 
@@ -149,8 +161,8 @@ HistoryPlayer{
 		playlistFile.close;
 
 
-		// playlist = this.folderFiles(rootFolder +/+ "HistoryPlayer" +/+ "HistoryFiles", true, \scd, true, true);
-		this.refreshPlaylist;
+
+		// this.refreshPlaylist;
 	}
 
 	newTemplate {
@@ -490,6 +502,21 @@ HistoryPlayer{
 
 
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	initGUI{|winX, winY|
 		var viewOriginX, viewOriginY, viewSizeX, viewSizeY;

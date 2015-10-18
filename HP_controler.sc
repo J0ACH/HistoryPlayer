@@ -7,21 +7,21 @@ HP_controler{
 	var view, objects;
 
 
-	*new { |parent, origin, sizeX, sizeY|
-		^super.newCopyArgs(parent, origin, sizeX, sizeY).init;
+	*new { |parent|
+		^super.newCopyArgs(parent).init;
 	}
 
 	init{
 		objects = Dictionary.new;
 
-		this.initGUI;
-		this.refreshGUI;
+		// this.initGUI;
+		// this.refreshGUI;
 	}
 
 	window { ^parent.window; }
 	template { ^parent.template; }
 
-	initGUI{
+	initGUI{ |origin, sizeX, sizeY|
 		var buttonSizeX = 30;
 		var buttonSizeY = 30;
 
@@ -44,6 +44,36 @@ HP_controler{
 			.editable_(false)
 			// .hasVerticalScroller_(true)
 		);
+
+		objects.put(\info_loadPath, StaticText( view, Rect.fromPoints( (10@375), ((view.bounds.width - 10)@390) ))
+			.string_("historyPath : nil")
+			.font_(this.template[\fontSmall])
+			.stringColor_(this.template[\colorFront])
+			.align_(\topLeft)
+		);
+
+		objects.put(\info_linesCount, StaticText( view, Rect.fromPoints( (10@395),(100@410)))
+			.string_("lines : nil")
+			.font_(this.template[\fontSmall])
+			.stringColor_(this.template[\colorFront])
+			.align_(\topLeft)
+		);
+
+		objects.put(\info_endTime, StaticText( view, Rect.fromPoints( (10@415), (100@430)))
+			.string_("EndTime : nil")
+			.font_(this.template[\fontSmall])
+			.stringColor_(this.template[\colorFront])
+			.align_(\topLeft)
+		);
+
+		objects.put(\clock_playtime, StaticText( view, Rect.fromPoints((10@460), (150@480)))
+			.string_("0:00:00")
+			.font_(this.template[\fontTime])
+			.stringColor_(this.template[\colorFront])
+			.align_(\topLeft)
+		);
+
+		objects.put(\clock_slider, Slider(view, Rect.fromPoints( (10@490), ((view.bounds.width - 10)@500) )));
 
 		objects.put(\control_play, Button(view, Rect(5, view.bounds.height - 35, buttonSizeX, buttonSizeY))
 			.font_(this.template[\fontSmall])
@@ -76,6 +106,7 @@ HP_controler{
 				["open", this.template[\colorFront], this.template[\colorActive]]
 			])
 		);
+		^view;
 	}
 
 	refreshGUI {

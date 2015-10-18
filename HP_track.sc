@@ -5,7 +5,7 @@ HP_track{
 	var tracks;
 
 	var view, objects;
-	var originX, originY;
+	var origin;
 	var sizeX, sizeY;
 	var displayMode;
 
@@ -27,13 +27,12 @@ HP_track{
 	init{ |path|
 		historyFile = PathName(path);
 		historyLines = History.loadCS(path).lines.reverse;
+
 		isLoad = true;
+		isMouseOver = false;
 
 		objects = Dictionary.new;
 
-		isMouseOver = false;
-		originX = 10;
-		originY = 10;
 
 		this.setDisplayMode(\smallTrack);
 		// this.print(\lines);
@@ -82,15 +81,19 @@ HP_track{
 		^("%/%/%".format(date[2], date[1], date[0])).asString;
 	}
 
-	gui{|parent|
-		view = UserView.new(parent, Rect(10,10,sizeX, sizeY))
+	initGUI{|parent, inPoint, dimX, dimY|
+		origin = inPoint;
+		sizeX = dimX;
+		sizeY = dimY;
+
+		view = UserView.new(parent, Rect(origin.x, origin.y, sizeX, sizeY))
 		.background_(template[\colorBackground])
 		.acceptsMouseOver_(true)
 		.resize_(2);
 
 		view.drawFunc = {|uview|
 
-			uview.moveTo(originX,originY);
+			uview.moveTo(origin.x,origin.y);
 
 
 			isMouseOver.if(
@@ -140,18 +143,18 @@ HP_track{
 			.align_(\topRight)
 		);
 
-		objects.put(\date, StaticText( view, Rect.fromPoints((150@30), ((view.bounds.width-5)@50)))
+		objects.put(\date, StaticText( view, Rect.fromPoints((50@30), ((view.bounds.width-5)@50)))
 			.string_(this.modifyDate)
 			.font_(template[\fontChapter])
 			.stringColor_(template[\colorFront])
 			.align_(\topRight)
 		);
 
-		objects.put(\players, StaticText( view, Rect.fromPoints((150@30), ((view.bounds.width-5)@50)))
+		objects.put(\players, StaticText( view, Rect.fromPoints((5@30), ((view.bounds.width-70)@50)))
 			.string_(this.players)
 			.font_(template[\fontChapter])
 			.stringColor_(template[\colorFront])
-			.align_(\topLeft)
+			.align_(\topRight)
 		);
 
 
@@ -173,8 +176,8 @@ HP_track{
 
 	mouseMoveFunc {|w, x, y|
 		(mouseClickButton == 0).if({
-			originX = originX + x - mouseClickStartX;
-			originY = originY + y - mouseClickStartY;
+			origin.x = origin.x + x - mouseClickStartX;
+			origin.y = origin.y + y - mouseClickStartY;
 			w.refresh;
 		});
 	}

@@ -7,21 +7,21 @@ HP_playlist{
 	var view, objects;
 	var tracks;
 
-	*new { |parent, origin, sizeX, sizeY|
-		^super.newCopyArgs(parent, origin, sizeX, sizeY).init;
+	*new { |parent|
+		^super.newCopyArgs(parent).init;
 	}
 
 	init{
 		objects = Dictionary.new;
 
-		this.initGUI;
-		this.refreshGUI;
+		// this.initGUI;
+		// this.refreshGUI;
 	}
 
 	window { ^parent.window; }
 	template { ^parent.template; }
 
-	initGUI{
+	initGUI{ |origin, sizeX, sizeY|
 		view = UserView.new(this.window, Rect(origin.x, origin.y, sizeX, sizeY))
 		.background_(this.template[\colorBackground]);
 
@@ -31,6 +31,7 @@ HP_playlist{
 			.stringColor_(this.template[\colorFront])
 			.align_(\topLeft)
 		);
+		^view;
 	}
 
 	refreshGUI {
