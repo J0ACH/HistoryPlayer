@@ -25,6 +25,14 @@ HP_playlist{
 		view = UserView.new(this.window, Rect(origin.x, origin.y, sizeX, sizeY))
 		.background_(this.template[\colorBackground]);
 
+		view.canReceiveDragHandler = {View.currentDrag.isNumber}; // what to receive
+		view.receiveDragHandler = { View.currentDrag.postln; view.doAction }; // what to do on receiving
+
+		view.action = ({|a|
+			a.postln;
+		});
+
+
 		objects.put(\label, StaticText( view, Rect.fromPoints((5@5), (50@20)))
 			.string_("playlist")
 			.font_(this.template[\fontChapter])

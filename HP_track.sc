@@ -127,6 +127,10 @@ HP_track{
 			w.refresh;
 		};
 
+		view.beginDragAction = {"beginDrag %".format(this.name).postln; this.name; }; // what to drag
+		view.canReceiveDragHandler = {View.currentDrag.isNumber}; // what to receive
+		view.receiveDragHandler = { View.currentDrag.postln; view.doAction }; // what to do on receiving
+
 
 
 		objects.put(\name, StaticText( view, Rect.fromPoints((5@5), (150@30)))

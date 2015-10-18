@@ -73,6 +73,13 @@ HP_library{
 		view = UserView.new(this.window, Rect(origin.x, origin.y, sizeX, sizeY))
 		.background_(this.template[\colorBackground]);
 
+		view.canReceiveDragHandler = {View.currentDrag.isNumber}; // what to receive
+		view.receiveDragHandler = { View.currentDrag.postln; view.doAction }; // what to do on receiving
+view.action = ({|a|
+			a.postln;
+			"aaaaa".postln;
+		});
+
 		tracks.do({|oneTrack, i|
 			oneTrack.historyPath.postln;
 			oneTrack.template = this.template;
