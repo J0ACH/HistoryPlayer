@@ -9,8 +9,6 @@ HP_track{
 	var sizeX, sizeY;
 	var displayMode;
 
-
-
 	var >template;
 
 	var historyFile, historyLines;
@@ -18,7 +16,7 @@ HP_track{
 
 
 	var mouseClickStartX, mouseClickStartY, mouseClickButton;
-	var isMouseOver;
+	var isMouseOver, isDrag;
 
 	*new{ |path|
 		^super.new.init(path);
@@ -30,6 +28,7 @@ HP_track{
 
 		isLoad = true;
 		isMouseOver = false;
+		isDrag = false;
 
 		objects = Dictionary.new;
 
@@ -81,6 +80,37 @@ HP_track{
 		^("%/%/%".format(date[2], date[1], date[0])).asString;
 	}
 
+
+
+	mouseDownFunc {|w, x, y, buttNum|
+		mouseClickButton = buttNum;
+		mouseClickStartX = x;
+		mouseClickStartY = y;
+	}
+
+	mouseUpFunc {|w, x, y, mod|
+		"track mouseUpFunc % [%,%, mod:%]".format(this.name,x,y,mod).postln;
+		// postf("end path: (startX-x)==XXX mouse coordinates:[%,%]\n", x,y); //(startX-x),
+		isDrag.if({
+			"end of drag %".format(this.name).postln;
+
+			isDrag = false;
+		});
+	}
+
+	mouseMoveFunc {|w, x, y|
+		(mouseClickButton == 0).if({
+			origin.x = origin.x + x - mouseClickStartX;
+			origin.y = origin.y + y - mouseClickStartY;
+			w.refresh;
+		});
+		isDrag = true;
+		// w.refresh;
+	}
+	mouseOverAction {|w, x, y|
+		"track over % [%,%]".format(this.name, x, y).postln;
+	}
+
 	initGUI{|parent, inPoint, dimX, dimY|
 		origin = inPoint;
 		sizeX = dimX;
@@ -88,13 +118,13 @@ HP_track{
 
 		view = UserView.new(parent, Rect(origin.x, origin.y, sizeX, sizeY))
 		.background_(template[\colorBackground])
-		.acceptsMouseOver_(true)
+		.name_(this.name)
+		// .acceptsMouseOver_(true)
 		.resize_(2);
 
 		view.drawFunc = {|uview|
 
 			uview.moveTo(origin.x,origin.y);
-
 
 			isMouseOver.if(
 				{Pen.strokeColor = template[\colorFront];},
@@ -108,10 +138,11 @@ HP_track{
 			// Pen.moveTo(0@uview.bounds.height.rand);
 			// Pen.lineTo(uview.bounds.width@uview.bounds.height.rand);
 			// Pen.stroke;
+
 		};
 
 		view.mouseDownAction = {|w, x, y, modKey, buttNum, clickCnt| this.mouseDownFunc(w, x, y, buttNum); };
-		// view.mouseUpAction = {|me, x, y, mod| this.mouseUpFunc(me, x, y, mod);  };
+		view.mouseUpAction = {|me, x, y, mod| this.mouseUpFunc(me, x, y, mod);  };
 		view.mouseMoveAction = {|w, x, y, modKey| this.mouseMoveFunc(w, x, y); };
 		view.mouseOverAction = {|w, x, y| this.mouseOverAction(w, x, y); };
 		view.mouseEnterAction = {|w, x, y|
@@ -167,27 +198,7 @@ HP_track{
 		^view;
 	}
 
-	mouseDownFunc {|w, x, y, buttNum|
-		mouseClickButton = buttNum;
-		mouseClickStartX = x;
-		mouseClickStartY = y;
-	}
 
-	mouseUpFunc {|w, x, y, mod|
-		postf("end path: (startX-x)==XXX mouse coordinates:[%,%]\n", x,y); //(startX-x),
-
-	}
-
-	mouseMoveFunc {|w, x, y|
-		(mouseClickButton == 0).if({
-			origin.x = origin.x + x - mouseClickStartX;
-			origin.y = origin.y + y - mouseClickStartY;
-			w.refresh;
-		});
-	}
-	mouseOverAction {|w, x, y|
-		"over %".format(w).postln;
-	}
 
 
 	print{|type|

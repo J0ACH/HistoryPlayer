@@ -68,6 +68,10 @@ HistoryPlayer{
 		});
 	}
 
+	mouseOverAction {|w, x, y|
+		// "window over % [%,%]".format(w.name, x,y).postln;
+	}
+
 	initGraphics { |winX, winY|
 		// var viewOriginX, viewOriginY, viewSizeX, viewSizeY;
 		// var originX, originY, sizeX, sizeY;
@@ -77,8 +81,11 @@ HistoryPlayer{
 		.alpha_(template[\opacityWin])
 		.background_(template[\colorBackground])
 		.front
+		.acceptsMouseOver_(true)
 		// .userCanClose_(false)
 		.onClose_({ this.close; });
+
+		window.view.mouseOverAction = {|w, x, y| this.mouseOverAction(w, x, y); };
 
 		panels.put(\controler, controler.initGUI((5@5), 400, window.bounds.height - 10));
 		panels.put(\playlist, playlistNew.initGUI((410@5), 320, window.bounds.height - 10));
